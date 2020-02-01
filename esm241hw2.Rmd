@@ -1,0 +1,77 @@
+---
+title: "esm241_hw2"
+author: "Alex Milward"
+date: "1/31/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results = 'asis'}
+library(tidyverse)
+library(janitor)
+
+survey <- read_csv("DeGoliaSurvey_PSETXLS (1).csv") %>% 
+  clean_names()
+
+survey_republicans <- survey %>% 
+  filter(partyid == "1") %>% 
+  mutate(avg_cap = mean(captrade),
+         ave_renew = mean(renewables),
+         avg_land = mean(landconservation))
+
+survey_democrats <- survey %>% 
+  filter(partyid == "2") %>% 
+  mutate(avg_cap = mean(captrade),
+         ave_renew = mean(renewables),
+         avg_land = mean(landconservation))
+
+survey_ind <- survey %>% 
+  filter(partyid == "3") %>% 
+  mutate(avg_cap = mean(captrade),
+         ave_renew = mean(renewables),
+         avg_land = mean(landconservation))
+
+survey_summary <- survey %>% 
+  group_by(partyid) %>% 
+  summarize(avg_cap = mean(captrade),
+            avg_renew = mean(renewables),
+            avg_land = mean(landconservation))
+
+summary_tot <- survey %>% 
+  summarize(avg_cap = mean(captrade),
+            avg_renew = mean(renewables),
+            avg_land = mean(landconservation))
+
+survey_gender <- survey %>% 
+  group_by(gender) %>% 
+  summarize(avg_cap = mean(captrade),
+            avg_renew = mean(renewables),
+            avg_land = mean(landconservation))
+
+library(stargazer)
+library(kableExtra)
+
+survey_lm_data <- survey %>% 
+  filter(partyid!=4) %>% 
+  mutate(gender = case_when(
+    gender == "1" ~ "male",
+    gender == "2" ~ "female"
+  )) %>% 
+  mutate(partyid = case_when(
+    partyid == "1" ~ "republican",
+    partyid == "2" ~ "democrat",
+    partyid == "3" ~ "independent"
+  ))
+
+survey_lm <- lm(landconservation ~ education + age + income + gender + partyid, data = survey_lm_data)
+summary(survey_lm)
+
+plot(survey_lm)
+
+stargazer(survey_lm, type = "html")
+```
+
+
